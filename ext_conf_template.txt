@@ -1,0 +1,12 @@
+  # cat=basic//40; type=boolean; label= Generate HTML report: You can read the report in your web browser at: http://your_typo3_instalation/typo3temp/ttnewscache/report.html
+htmlReport = 1
+  # cat=basic//60; type=boolean; label= Clear cache: Turn on the cache clear. NOTE! You need to install additional extension so it can work. See the manual ('What clearing extensions can I install?').
+clearCache = 0
+  # cat=basic//60; type=boolean; label= Automatic views search: (Recommended) Let the extension search for tt_news plugin you have on you site. If you turn it off will will have to enter the information manually using TypoScript. See manual.
+automaticViewsSearch = 1
+  # cat=basic//80; type=boolean; label= Debug: t3lib_div::devLog is used (extension: devlog)
+debug = 0
+ # cat=basic//100; type=string; label= Buffered views filename: Name of the file to store the buffered views (filename with extension). Remember to delete the old file in typo3temp/ttnewscache/.
+viewsCacheFileName = views_cache
+ # cat=basic//120; type=string; label= HTML Report filename: Name of the file to store the HTLM report (filename with extension). Remember to delete the old file in typo3temp/ttnewscache/.
+reportFileName = report.html
