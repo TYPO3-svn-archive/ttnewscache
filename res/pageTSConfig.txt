@@ -3,15 +3,16 @@ tx_ttnewscache {
  bidirectionalRelations = 1
  bidirectionalRelationsCatMatch = 0
  views {
-	list {
-        selectiveViewClearFields = title,bodytext,short,image,imagecaption,imagealttext,imagetitletext,tx_damnews_dam_images
-        wholeViewClearFields = datetime,category,hidden
- 	}
- 	latest {
-        selectiveViewClearFields = title
-        wholeViewClearFields = datetime,category,hidden
- 	}
- 	single {
-        relatedClearFields = title,related,datetime,hidden,category
- 	}
+			list {
+				selectiveViewClearFields = title,bodytext,short,image,imagecaption,imagealttext,imagetitletext,tx_damnews_dam_images
+				wholeViewClearFields = datetime,category,hidden
+			}
+			latest {
+				selectiveViewClearFields = title
+				wholeViewClearFields = datetime,category,hidden
+			}
+			single {
+				relatedClearFields = title,related,datetime,hidden,category
+			}
+		}
 }
