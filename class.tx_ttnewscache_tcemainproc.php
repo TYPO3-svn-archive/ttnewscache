@@ -457,7 +457,7 @@ class tx_ttnewscache_tcemainproc {
 											}
 											break;
 
-										case 3:
+										case -1:
 											// AND (NOT SHOW) - do not show news at this view if the news has all views categories
 
 											if ( !(count($commonCategories) == count($viewCategories)) ) {
@@ -467,7 +467,7 @@ class tx_ttnewscache_tcemainproc {
 											}
 											break;
 
-										case 4:
+										case -2:
 											// OR (NOT SHOW) - do not show news at this view if the news has at lest one of the view categories
 
 											if ( count($commonCategories) == 0 ) {
