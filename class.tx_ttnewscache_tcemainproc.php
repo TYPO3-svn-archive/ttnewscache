@@ -604,11 +604,12 @@ class tx_ttnewscache_tcemainproc {
 								//debug($viewsData['single.']['data.'],'single');
 								//debug($viewsData['list.']['data.'],'list');
 								//debug($viewsData['latest.']['data.'],'latest');
+						}//switch new,update
 
-								if ($this->clearCache) {
-									//hook for clear cache functions
-									if (is_array ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ttnewscache']['clearCache'])) {
-										$newsData = array(
+						//hook for clear cache functions
+						if ($this->clearCache) {
+							if (is_array ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ttnewscache']['clearCache'])) {
+								$newsData = array(
 														'status' => $status,
 														'id' => $id,
 														'relations' => $thisRef->datamap['tt_news'][$id]['related'],
@@ -616,19 +617,18 @@ class tx_ttnewscache_tcemainproc {
 														'relationsBefore' => $this->newsRelatedBeforeUpdate,
 														'categoriesBefore' => $this->newsCategoriesBeforeUpdate,
 														'clearRelated' => $clearRelated
-										);
+								);
 
-										$params = array(
+								$params = array(
 														'newsData' => $newsData,
 														'viewsData' => $viewsData,
 														'pObj' => &$thisRef,
-										);
-										foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ttnewscache']['clearCache'] as $func) {
-											t3lib_div::callUserFunction($func, $params, $this, '');
-										}
-									}
+								);
+								foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ttnewscache']['clearCache'] as $func) {
+									t3lib_div::callUserFunction($func, $params, $this, '');
 								}
-						}//switch new,update
+							}
+						}
 						//debug($viewsData);
 					} else {//viewsCategoryMatchCounter - no match on view so no cache clear
 						t3lib_div::devLog('No need to cache clear. Reason: no views that match the categories of the news.', $this->extKey);
