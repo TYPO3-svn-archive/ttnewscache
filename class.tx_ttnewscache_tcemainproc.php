@@ -302,6 +302,7 @@ class tx_ttnewscache_tcemainproc {
 							if ($this->debug && $fileStatus)t3lib_div::devLog('Error on automatic views generation: '.$fileStatus, $this->extKey, 3);
 						}
 						//merge manually added views (from PageTS) with automatically detected from tt_content
+						if(is_array($viewsData))
 						$viewsData = t3lib_div::array_merge_recursive_overrule($viewsData, $pageTS['tx_ttnewscache.']['views.']);
 
 						if ($this->debug){
