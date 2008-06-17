@@ -60,6 +60,7 @@
 class tx_ttnewscache_tcemainproc {
 
 	var $extKey = 'ttnewscache';
+	var $initialized = 0;
 
 	var $debug = 0;
 	var $htmlReport = 1;
@@ -92,7 +93,7 @@ class tx_ttnewscache_tcemainproc {
 			$this->TT = new t3lib_timeTrack;
 			$this->TT->start();
 		}
-
+		$this->initialized = 1;
 	}
 
 	/**
@@ -108,7 +109,7 @@ class tx_ttnewscache_tcemainproc {
 
 		if ($table == 'tt_news') {
 
-			$this->init();
+			if(!$this->initialized) $this->init();
 
 			if ($this->debug){
 				$startTime = $this->TT->mtime();
@@ -152,9 +153,9 @@ class tx_ttnewscache_tcemainproc {
 	 */
 	function processCmdmap_preProcess ($command, $table, $id, $value, &$thisRef) {
 
-		$this->init();
-
 		if ($command == 'delete' && $table == 'tt_news') {
+
+			if(!$this->initialized) $this->init();
 
 			if ($this->debug) {
 				$startTime = $this->TT->mtime();
@@ -205,13 +206,17 @@ class tx_ttnewscache_tcemainproc {
 	 */
 	function processDatamap_afterDatabaseOperations($status, $table, $id, &$fieldArray, &$thisRef) {
 
-		$viewsCacheFile = PATH_site .'typo3temp/ttnewscache/'.$this->viewsCacheFileName;
 
 		switch ($table) {
 			case 'pages':
 				// only if TSconfig updated
 				// maybe the extension configuration was changed so clear the file with views data
+
 				if (isset($fieldArray['TSconfig'])) {
+
+					if(!$this->initialized) $this->init();
+					$viewsCacheFile = PATH_site .'typo3temp/ttnewscache/'.$this->viewsCacheFileName;
+
 					if (file_exists($viewsCacheFile)) @unlink($viewsCacheFile);
 					if ($this->debug) t3lib_div::devLog('Change on PageTS config (page id:'.$id.') so clear the cache file with views data at: '.$viewsCacheFile, 'ttnewscache');
 				}
@@ -220,7 +225,12 @@ class tx_ttnewscache_tcemainproc {
 			case 'tt_content':
 				// only if tt_content with tt_news plugin inside updated
 				// the plugin was changed so clear the file with views data
+
 				if ($thisRef->checkValue_currentRecord['list_type'] == 9) {
+
+					if(!$this->initialized) $this->init();
+					$viewsCacheFile = PATH_site .'typo3temp/ttnewscache/'.$this->viewsCacheFileName;
+
 					if (file_exists($viewsCacheFile)) @unlink($viewsCacheFile);
 					if ($this->debug) t3lib_div::devLog('Change on tt_content with tt_news plugin inside so clear the cache file with views data at: '.$viewsCacheFile, 'ttnewscache',0,$fieldArray);
 				}
@@ -231,6 +241,10 @@ class tx_ttnewscache_tcemainproc {
 				// CATEGORY CHANGE BUG? [START]
 				// Problem: if the number of selected categories does NOT change then $status==update but $fieldArray is empty
 				// Solution: check if there really was category update
+
+				if(!$this->initialized) $this->init();
+				$viewsCacheFile = PATH_site .'typo3temp/ttnewscache/'.$this->viewsCacheFileName;
+
 				$newsCategories = $thisRef->datamap['tt_news'][$id]['category'];
 				$newsCategories = t3lib_div::rm_endcomma($newsCategories);
 
