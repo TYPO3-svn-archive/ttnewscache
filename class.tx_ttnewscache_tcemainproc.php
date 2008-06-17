@@ -614,7 +614,6 @@ class tx_ttnewscache_tcemainproc {
 									$endTime = $this->TT->mtime();
 									t3lib_div::devLog('[AS][END] Action Set  (time: '. $endTime .' - '. $startTime . ' = ' . ($endTime - $startTime) .'ms)', $this->extKey);
 								}
-
 								//debug($viewsData['single.']['data.'],'single');
 								//debug($viewsData['list.']['data.'],'list');
 								//debug($viewsData['latest.']['data.'],'latest');
@@ -622,7 +621,36 @@ class tx_ttnewscache_tcemainproc {
 
 						//hook for clear cache functions
 						if ($this->clearCache) {
+							// set the order the extensions are executed - if anyone has better idea how to solve it - plz share
+							// extension can set priority by defining variable ttnewscache_priority in ext_conf_template.txt
 							if (is_array ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ttnewscache']['clearCache'])) {
+
+								foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ttnewscache']['clearCache'] as $ext) {
+
+									preg_match('/EXT:([a-z0-9_]+)\//',$ext,$matches);
+
+									if(t3lib_extMgm::isLoaded($matches[1])){
+
+										if($this->debug) t3lib_div::devLog('Hook Priority Check: extension "'.$matches[1].'" detected.', $this->extKey);
+										$confArr = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$matches[1]]);
+
+										//if extension has no priority set it to 1 - will be executed as first
+										if(!isset($confArr['ttnewscache_priority'])) $confArr['ttnewscache_priority'] = 1;
+
+										$extPriority[] = $confArr['ttnewscache_priority'];
+										$extClass[] = $ext;
+
+									}else{
+										if($this->debug) t3lib_div::devLog('Hook Priority Check: extension "'.$matches[1].'" not found. Ext:('.$ext.')', $this->extKey, 2);
+									}
+								}
+								if(is_array($extPriority)){
+									$prioritizedClasses = array ($extPriority,$extClass);
+									array_multisort ($prioritizedClasses[0],$prioritizedClasses[1]);
+								}
+							}
+							//order set - now call the functions if any
+							if (is_array($prioritizedClasses[1])) {
 								$newsData = array(
 														'status' => $status,
 														'id' => $id,
@@ -638,12 +666,11 @@ class tx_ttnewscache_tcemainproc {
 														'viewsData' => $viewsData,
 														'pObj' => &$thisRef,
 								);
-								foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ttnewscache']['clearCache'] as $func) {
+								foreach($prioritizedClasses[1] as $func) {
 									t3lib_div::callUserFunction($func, $params, $this, '');
 								}
 							}
 						}
-						//debug($viewsData);
 					} else {//viewsCategoryMatchCounter - no match on view so no cache clear
 						t3lib_div::devLog('No need to cache clear. Reason: no views that match the categories of the news.', $this->extKey);
 					}
