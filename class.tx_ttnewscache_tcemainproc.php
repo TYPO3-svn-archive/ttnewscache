@@ -161,28 +161,9 @@ class tx_ttnewscache_tcemainproc {
 				$startTime = $this->TT->mtime();
 				t3lib_div::devLog('[DL][START] (Delete) processCmdmap_preProcess',$this->extKey);
 			}
+			
 			// recreate structure $thisRef->datamap['tt_news'][$id] to use in $this->processDatamap_afterDatabaseOperations
-
-			// 1. category
-			$thisRef->datamap['tt_news'][$id]['category'] = $this->getArrayOfTTnewsCategories($id);
-			if (is_array($thisRef->datamap['tt_news'][$id]['category'])) $thisRef->datamap['tt_news'][$id]['category'] = implode(',', $this->getArrayOfTTnewsCategories($id));
-			if ($this->debug) t3lib_div::devLog('[DL] Prepare for delete - newsCategories: '.$thisRef->datamap['tt_news'][$id]['category'],$this->extKey);
-
-			// 2. related
-			$thisRef->datamap['tt_news'][$id]['related'] = $this->getArrayOfTTnewsRelated($id);
-			if (is_array($thisRef->datamap['tt_news'][$id]['related'])) {
-				$fieldArray['related'] = 1;
-				$thisRef->datamap['tt_news'][$id]['related'] = implode(',', $thisRef->datamap['tt_news'][$id]['related']);
-				if ($this->debug) t3lib_div::devLog('[DL] Prepare for delete - newsRelated: '.$thisRef->datamap['tt_news'][$id]['related'],$this->extKey);
-			}
-
-			// 3. pid, title
-			$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('pid, title, hidden', 'tt_news', 'uid='.intval($id));
-			if ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
-				$thisRef->checkValue_currentRecord['pid'] = $row['pid'];
-				$thisRef->datamap['tt_news'][$id]['title'] = $row['title'];
-				$thisRef->datamap['tt_news'][$id]['hidden'] = $row['hidden'];
-			}
+			list($thisRef, $fieldArray) = $this->prepareFakeDataForProcessDatamap($row);
 
 			if ($this->debug){
 				$endTime = $this->TT->mtime();
@@ -194,6 +175,39 @@ class tx_ttnewscache_tcemainproc {
 		}
 	}
 
+	/**
+	 * Function used to prepare data structures used in processDatamap_afterDatabaseOperations function
+	 *
+	 * @param	array		array with tt_enws record data for which the fake data should be done
+	 * @return	array		2 arrays inside. Frist $thisRef structure. Second $fieldArray.
+	 */
+	function prepareFakeDataForProcessDatamap($row) {
+		
+		$id = $row['uid'];
+		
+		// 1. category
+		$thisRef->datamap['tt_news'][$id]['category'] = $this->getArrayOfTTnewsCategories($id);
+		if (is_array($thisRef->datamap['tt_news'][$id]['category'])) $thisRef->datamap['tt_news'][$id]['category'] = implode(',', $this->getArrayOfTTnewsCategories($id));
+		if ($this->debug) t3lib_div::devLog('[DL] Prepare fake data - newsCategories: '.$thisRef->datamap['tt_news'][$id]['category'],$this->extKey);
+
+		// 2. related
+		$thisRef->datamap['tt_news'][$id]['related'] = $this->getArrayOfTTnewsRelated($id);
+		if (is_array($thisRef->datamap['tt_news'][$id]['related'])) {
+			$fieldArray['related'] = 1;
+			$thisRef->datamap['tt_news'][$id]['related'] = implode(',', $thisRef->datamap['tt_news'][$id]['related']);
+			if ($this->debug) t3lib_div::devLog('[DL] Prepare fake data - newsRelated: '.$thisRef->datamap['tt_news'][$id]['related'],$this->extKey);
+		}
+
+		// 3. pid, title
+		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('pid, title, hidden', 'tt_news', 'uid='.intval($id));
+		if ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
+			$thisRef->checkValue_currentRecord['pid'] = $row['pid'];
+			$thisRef->datamap['tt_news'][$id]['title'] = $row['title'];
+			$thisRef->datamap['tt_news'][$id]['hidden'] = $row['hidden'];
+		}
+		return array($thisRef, $fieldArray);
+	}	
+			
 	/**
 	 * TCEmain hook used to take care of 'new', 'update' and 'delete' record. 'delete' is kind "fake" - is called from processCmdmap_preProcess.
 	 *
