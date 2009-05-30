@@ -5,14 +5,14 @@ tx_ttnewscache {
  views {
 			list {
 				selectiveViewClearFields = title,bodytext,short,image,imagecaption,imagealttext,imagetitletext,tx_damnews_dam_images
-				wholeViewClearFields = datetime,category,hidden
+				wholeViewClearFields = datetime,category,hidden,starttime,endtime
 			}
 			latest {
 				selectiveViewClearFields = title
-				wholeViewClearFields = datetime,category,hidden
+				wholeViewClearFields = datetime,category,hidden,starttime,endtime
 			}
 			single {
-				relatedClearFields = title,related,datetime,hidden,category
+				relatedClearFields = title,related,datetime,hidden,category,starttime,endtime
 			}
 		}
 }
